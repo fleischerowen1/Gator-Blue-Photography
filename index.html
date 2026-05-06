@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Focus — Underwater Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #fafaf8;
+      --black: #0e0e0e;
+      --mid: #6b6b6b;
+      --light: #e8e8e4;
+      --accent: #2a5c7a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      background: var(--white);
+      color: var(--black);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 4rem;
+      background: rgba(250, 250, 248, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+
+    nav.scrolled { border-bottom-color: var(--light); }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--black); }
+
+    /* ── HERO ── */
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 4rem 5rem;
+      position: relative;
+      overflow: hidden;
+      background: #1a2f3a;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(42,92,122,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse at 75% 30%, rgba(15,40,60,0.5) 0%, transparent 55%),
+        linear-gradient(160deg, #0d1f2d 0%, #1e3a4a 50%, #0d2233 100%);
+    }
+
+    /* subtle animated caustic light */
+    .caustic {
+      position: absolute;
+      inset: 0;
+      opacity: 0.06;
+      background-image:
+        radial-gradient(ellipse 80px 40px at 20% 35%, white, transparent),
+        radial-gradient(ellipse 60px 30px at 55% 20%, white, transparent),
+        radial-gradient(ellipse 100px 50px at 70% 65%, white, transparent),
+        radial-gradient(ellipse 50px 25px at 40% 75%, white, transparent);
+      animation: drift 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      from { transform: translateX(0) translateY(0); }
+      to   { transform: translateX(12px) translateY(-8px); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 640px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .hero-sub {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.5);
+      max-width: 380px;
+      line-height: 1.8;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 0.8; }
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 7rem 4rem; }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 60px;
+      height: 1px;
+      background: var(--light);
+    }
+
+    /* ── GALLERY ── */
+    #gallery { background: var(--white); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .gallery-item {
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .gallery-item:nth-child(1) { grid-column: span 7; grid-row: span 2; }
+    .gallery-item:nth-child(2) { grid-column: span 5; }
+    .gallery-item:nth-child(3) { grid-column: span 5; }
+    .gallery-item:nth-child(4) { grid-column: span 4; }
+    .gallery-item:nth-child(5) { grid-column: span 4; }
+    .gallery-item:nth-child(6) { grid-column: span 4; }
+
+    .gallery-item .placeholder {
+      width: 100%;
+      padding-top: 72%;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-item:nth-child(1) .placeholder { padding-top: 80%; }
+    .gallery-item:nth-child(4) .placeholder,
+    .gallery-item:nth-child(5) .placeholder,
+    .gallery-item:nth-child(6) .placeholder { padding-top: 90%; }
+
+    .gallery-item .placeholder-inner {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .gallery-item:hover .placeholder-inner { transform: scale(1.04); }
+
+    /* Placeholder photo tones — replace src with real photos */
+    .p1 { background: linear-gradient(135deg, #0d2233 0%, #1a4a6b 40%, #0f3347 100%); }
+    .p2 { background: linear-gradient(135deg, #1a3a2a 0%, #0d5a3a 50%, #0a2d1e 100%); }
+    .p3 { background: linear-gradient(135deg, #0d1f3a 0%, #1a2f5a 50%, #0a1a30 100%); }
+    .p4 { background: linear-gradient(135deg, #1a2a1a 0%, #2a4a2a 50%, #0d1f0d 100%); }
+    .p5 { background: linear-gradient(135deg, #1a1a2a 0%, #2a2a4a 50%, #0d0d1f 100%); }
+    .p6 { background: linear-gradient(135deg, #0d2a2a 0%, #1a4a4a 50%, #0a1f1f 100%); }
+
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.5rem 1rem 0.75rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+      transform: translateY(100%);
+      transition: transform 0.35s ease;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .gallery-item:hover .gallery-caption { transform: translateY(0); }
+
+    .gallery-note {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--mid);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      background: #f5f4ef;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .about-photo {
+      aspect-ratio: 3/4;
+      background: linear-gradient(160deg, #1a2f3a, #0d1f2d);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .about-photo-note {
+      position: absolute;
+      bottom: 1rem; left: 1rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+
+    .about-text h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-text h2 em { font-style: italic; color: var(--mid); }
+
+    .about-text p {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 1.2rem;
+      max-width: 480px;
+    }
+
+    .about-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--light);
+    }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.25rem;
+      font-weight: 300;
+      color: var(--black);
+      display: block;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--black); color: var(--white); }
+
+    #contact .section-label { color: rgba(255,255,255,0.3); }
+    #contact .section-label::after { background: rgba(255,255,255,0.1); }
+
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .contact-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3.5vw, 3.25rem);
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-heading em { font-style: italic; color: rgba(255,255,255,0.45); }
+
+    .contact-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      max-width: 380px;
+      line-height: 1.9;
+    }
+
+    .contact-links {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .contact-link:hover { color: #fff; }
+
+    .contact-link-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-field label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .form-field input,
+    .form-field textarea {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 300;
+      outline: none;
+      border-radius: 1px;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+
+    .form-field input:focus,
+    .form-field textarea:focus { border-color: rgba(42,92,122,0.6); }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder { color: rgba(255,255,255,0.2); }
+
+    .form-submit {
+      margin-top: 0.5rem;
+      align-self: flex-start;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+      padding: 0.75rem 2rem;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-submit:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
+      color: #fff;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      text-decoration: none;
+    }
+
+    .footer-copy {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 2rem; }
+      section { padding: 5rem 2rem; }
+      .hero { padding: 0 2rem 4rem; }
+      .hero-scroll { right: 2rem; }
+      #about { grid-template-columns: 1fr; gap: 3rem; }
+      .contact-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .gallery-item:nth-child(1) { grid-column: span 12; }
+      .gallery-item:nth-child(2),
+      .gallery-item:nth-child(3) { grid-column: span 6; }
+      .gallery-item:nth-child(4),
+      .gallery-item:nth-child(5),
+      .gallery-item:nth-child(6) { grid-column: span 12; }
+      footer { padding: 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="#" class="nav-logo">Deep Focus</a>
+    <ul class="nav-links">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="caustic"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Underwater Photography</p>
+      <h1 class="hero-title">Light<br>beneath <em>the surface</em></h1>
+      <p class="hero-sub">Documenting the silent world below — one breath at a time.</p>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="gallery">
+    <p class="section-label">Gallery</p>
+    <div class="gallery-grid">
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <!-- Replace with: <img src="your-photo.jpg" alt="Description" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /> -->
+          <div class="placeholder-inner p1"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <div class="placeholder-inner p2"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <div class="placeholder-inner p3"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <div class="placeholder-inner p4"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <div class="placeholder-inner p5"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <div class="placeholder">
+          <div class="placeholder-inner p6"></div>
+          <div class="gallery-caption">Replace with your photo</div>
+        </div>
+      </div>
+
+    </div>
+    <p class="gallery-note">To add your photos: replace the placeholder divs with &lt;img&gt; tags pointing to your image files.</p>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div>
+      <div class="about-photo">
+        <!-- Replace with your portrait: <img src="portrait.jpg" style="width:100%;height:100%;object-fit:cover;" /> -->
+        <span class="about-photo-note">Your portrait here</span>
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="section-label">About</p>
+      <h2>Chasing <em>depth</em><br>and light</h2>
+      <p>Replace this with your story. Where do you dive? What draws you underwater? What gear do you shoot with?</p>
+      <p>This is a great place to mention your background, how long you've been shooting, any certifications or expeditions, and what inspires your work.</p>
+      <div class="about-stats">
+        <div>
+          <span class="stat-num">—</span>
+          <span class="stat-label">Dives</span>
+        </div>
+        <div>
+          <span class="stat-num">—</span>
+          <span class="stat-label">Locations</span>
+        </div>
+        <div>
+          <span class="stat-num">—</span>
+          <span class="stat-label">Years</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="contact-layout">
+      <div>
+        <p class="section-label">Contact</p>
+        <h2 class="contact-heading">Let's work <em>together</em></h2>
+        <p class="contact-desc">Available for editorial commissions, conservation projects, print licensing, and diving expeditions. Get in touch below.</p>
+        <div class="contact-links">
+          <a href="mailto:you@example.com" class="contact-link">
+            <span class="contact-link-dot"></span>
+            you@example.com
+          </a>
+          <a href="https://instagram.com" class="contact-link" target="_blank" rel="noopener">
+            <span class="contact-link-dot"></span>
+            @yourhandle
+          </a>
+        </div>
+      </div>
+      <form class="contact-form" onsubmit="handleSubmit(event)">
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Your name" />
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="form-field">
+          <label for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="Tell me about your project…"></textarea>
+        </div>
+        <button type="submit" class="form-submit">Send message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#home" class="footer-logo">Deep Focus</a>
+    <span class="footer-copy">&copy; 2025 — Your Name</span>
+  </footer>
+
+  <script>
+    // Sticky nav border on scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Smooth active link highlight (optional enhancement)
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => {
+            a.style.color = a.getAttribute('href') === '#' + e.target.id
+              ? 'var(--black)' : '';
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => obs.observe(s));
+
+    // Form — replace with Formspree or Netlify Forms for real submissions
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('.form-submit');
+      btn.textContent = 'Message sent ✓';
+      btn.style.color = '#7ab8a0';
+      btn.style.borderColor = 'rgba(122,184,160,0.3)';
+      btn.disabled = true;
+    }
+  </script>
+
+</body>
+</html>
